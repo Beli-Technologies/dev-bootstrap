@@ -146,4 +146,4 @@ step "Handing off to dev-setup/setup.sh"
 [[ -x "$BACKEND_DIR/dev-setup/setup.sh" ]] || die "dev-setup/setup.sh missing in the clone."
 echo "  (brew bundle → clone other repos → backend venv → frontend → VSCode → cache agent)"
 echo
-exec env BELI_DIR="$BELI_DIR" "$BACKEND_DIR/dev-setup/setup.sh"
+exec env BELI_DIR="$BELI_DIR" "$BACKEND_DIR/dev-setup/setup.sh" "$@"

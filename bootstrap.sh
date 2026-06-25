@@ -83,8 +83,12 @@ fi
 # ---------------------------------------------------------------------------
 step "Homebrew"
 if ! have brew; then
-  warn "Homebrew not found — installing (you may be prompted for your password) …"
-  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  warn "Homebrew not found — installing (you may be prompted for your password once) …"
+  sudo -v
+  while true; do sudo -n true; sleep 30; kill -0 "$$" || exit; done 2>/dev/null &
+  SUDO_KEEPALIVE_PID=$!
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  kill "$SUDO_KEEPALIVE_PID" 2>/dev/null
 fi
 # Resolve brew for this session (arm64 → /opt/homebrew, Intel → /usr/local) and persist it.
 if   [[ -x /opt/homebrew/bin/brew ]]; then BREW_BIN=/opt/homebrew/bin/brew

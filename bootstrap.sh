@@ -84,7 +84,14 @@ fi
 step "Homebrew"
 if ! have brew; then
   warn "Homebrew not found — installing (you may be prompted for your password once) …"
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" <"${TTY:-/dev/tty}"
+  # macOS 26+ sets timestamp_timeout=0 so every sudo call prompts. Temporarily
+  # grant NOPASSWD for this user so Homebrew's install only needs one prompt,
+  # then remove it immediately after. The trap ensures cleanup even on failure.
+  echo "$(whoami) ALL=(ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/homebrew_install >/dev/null
+  trap 'sudo rm -f /etc/sudoers.d/homebrew_install 2>/dev/null' EXIT
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  sudo rm -f /etc/sudoers.d/homebrew_install
+  trap - EXIT
 fi
 # Resolve brew for this session (arm64 → /opt/homebrew, Intel → /usr/local) and persist it.
 if   [[ -x /opt/homebrew/bin/brew ]]; then BREW_BIN=/opt/homebrew/bin/brew
